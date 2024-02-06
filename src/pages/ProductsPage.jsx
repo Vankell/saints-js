@@ -3,9 +3,10 @@ import { useLocation } from 'react-router-dom';
 import ProductCard from '../components/ProductCard.jsx';
 import PageNavbar from '../components/Navbar.jsx';
 import { AuthProvider } from '../components/auth/AuthContext';
-import data from '../components/database/data.jsx';
 import { v4 as uuidv4 } from 'uuid';
-import Footer from '../components/footer';
+import Footer from '../components/Footer.jsx';
+import { db } from '../components/db/db.jsx';
+import { collection, getDocs } from 'firebase/firestore';
 
 function ProductsPage() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -13,6 +14,19 @@ function ProductsPage() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const itemsPerPage = 6;
   const [cartItems, setCartItems] = useState([]);
+  const [data, setData] = useState([]);
+
+  // Fetch data from Firestore
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const productsCollection = collection(db, 'products');
+      const productsSnapshot = await getDocs(productsCollection);
+      const productsList = productsSnapshot.docs.map((doc) => doc.data());
+      setData(productsList);
+    };
+
+    fetchProducts();
+  }, []);
 
   const handleBuyNowClick = (product) => {
     const existingCartItem = cartItems.find((item) => item.title === product.title);
@@ -82,7 +96,7 @@ function ProductsPage() {
     } else {
       setFilteredData(categoryFilteredData);
     }
-  }, [location, selectedCategory, sortOption]);
+  }, [location, selectedCategory, sortOption, data]); // add data as a dependency
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -122,11 +136,15 @@ function ProductsPage() {
                 ))}
               </div>
               <div className='d-flex justify-content-center'>
-                <nav>
+                <nav className='mt-2'>
                   <ul className='pagination'>
                     {pageNumbers.map((number) => (
                       <li key={number} className='page-item'>
-                        <a onClick={handleClick} id={number} className='page-link'>
+                        <a
+                          onClick={handleClick}
+                          id={number}
+                          className='page-link'
+                          style={{ cursor: 'pointer', color: 'black' }}>
                           {number}
                         </a>
                       </li>
