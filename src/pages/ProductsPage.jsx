@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import ProductCard from '../components/ProductCard.jsx';
 import PageNavbar from '../components/Navbar.jsx';
-import { AuthProvider } from '../components/auth/AuthContext';
+import { AuthProvider, useAuth } from '../components/auth/AuthContext';
 import { v4 as uuidv4 } from 'uuid';
 import Footer from '../components/Footer.jsx';
 import { db } from '../components/db/db.jsx';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, doc, setDoc, getDoc } from 'firebase/firestore';
 
 function ProductsPage() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -15,6 +15,9 @@ function ProductsPage() {
   const itemsPerPage = 6;
   const [cartItems, setCartItems] = useState([]);
   const [data, setData] = useState([]);
+  const { currentUser } = useAuth();
+  const [wishlistItems, setWishlistItems] = useState([]);
+  const userRef = doc(db, 'users', currentUser.uid);
 
   // Fetch data from Firestore
   useEffect(() => {
@@ -27,6 +30,34 @@ function ProductsPage() {
 
     fetchProducts();
   }, []);
+  const handleAddToWishlist = async (product) => {
+    // Check if the product is already in the wishlist
+    const existingWishlistItem = wishlistItems.find((item) => item.title === product.title);
+
+    if (!existingWishlistItem) {
+      const newItem = {
+        ...product,
+        wishlistId: uuidv4(),
+      };
+
+      const updatedWishlistItems = [...wishlistItems, newItem];
+      setWishlistItems(updatedWishlistItems);
+
+      // Save the wishlist to Firestore
+      if (currentUser) {
+        const userRef = doc(db, 'users', currentUser.uid);
+        const userSnap = await getDoc(userRef);
+
+        if (userSnap.exists()) {
+          // If the user document already exists, update it
+          await setDoc(userRef, { wishlist: [...userSnap.data().wishlist, newItem] }, { merge: true });
+        } else {
+          // If the user document does not exist, create it
+          await setDoc(userRef, { wishlist: updatedWishlistItems });
+        }
+      }
+    }
+  };
 
   const handleBuyNowClick = (product) => {
     const existingCartItem = cartItems.find((item) => item.title === product.title);
@@ -96,7 +127,7 @@ function ProductsPage() {
     } else {
       setFilteredData(categoryFilteredData);
     }
-  }, [location, selectedCategory, sortOption, data]); // add data as a dependency
+  }, [location, selectedCategory, sortOption, data]);
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -123,8 +154,8 @@ function ProductsPage() {
               </select>
             </div>
             <div className='col-md-9'>
-              <div className='d-flex justify-content-end'>
-                <select onChange={handleSortChange} className='form-select' style={{ width: 'auto' }}>
+              <div className='d-flex justify-content-end '>
+                <select onChange={handleSortChange} className='form-select' style={{ width: '100%' }}>
                   <option value='default'>Sort by</option>
                   <option value='priceLowHigh'>Price: Low to High</option>
                   <option value='priceHighLow'>Price: High to Low</option>
@@ -132,7 +163,12 @@ function ProductsPage() {
               </div>
               <div className='row'>
                 {currentItems.map((product, index) => (
-                  <ProductCard key={index} product={product} onBuyNow={handleBuyNowClick} />
+                  <ProductCard
+                    key={index}
+                    product={product}
+                    onBuyNow={handleBuyNowClick}
+                    onAddToWishlist={handleAddToWishlist}
+                  />
                 ))}
               </div>
               <div className='d-flex justify-content-center'>

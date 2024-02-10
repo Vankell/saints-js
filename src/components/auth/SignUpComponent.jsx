@@ -2,6 +2,8 @@ import React, { useRef, useState } from 'react';
 import { Form, Button, Alert } from 'react-bootstrap';
 import { useAuth } from './AuthContext';
 import { useNavigate } from 'react-router';
+import { doc, setDoc } from 'firebase/firestore';
+import { db } from '../db/db';
 
 export default function SignupComponent() {
   const emailRef = useRef(null);
@@ -20,7 +22,11 @@ export default function SignupComponent() {
 
     try {
       setError('');
-      await signup(emailRef.current?.value ?? '', passwordRef.current?.value ?? '');
+      const userCredential = await signup(emailRef.current?.value ?? '', passwordRef.current?.value ?? '');
+      const user = userCredential.user;
+      const userRef = doc(db, 'users', user.uid);
+      await setDoc(userRef, { email: user.email, wishlist: [] });
+
       if (emailRef.current) {
         emailRef.current.value = '';
       }

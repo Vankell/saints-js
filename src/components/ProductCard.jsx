@@ -1,6 +1,6 @@
 import React from 'react';
 
-function ProductCard({ product, onBuyNow }) {
+function ProductCard({ product, onBuyNow, onAddToWishlist }) {
   return (
     <div className='col-sm-12 col-md-6 col-lg-4'>
       <div className='card h-100 ' style={{ borderRadius: 0 }}>
@@ -28,10 +28,7 @@ function ProductCard({ product, onBuyNow }) {
             </ul>
           </div>
           <div className='d-flex justify-content-around'>
-            <button
-              className='btn btn-secondary'
-              onClick={() => handleAddToWishlist(product)}
-              style={{ borderRadius: 0 }}>
+            <button className='btn btn-secondary' onClick={() => onAddToWishlist(product)} style={{ borderRadius: 0 }}>
               Add to Wishlist
             </button>
             <button className='btn btn-success' onClick={() => onBuyNow(product)} style={{ borderRadius: '0' }}>

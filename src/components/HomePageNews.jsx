@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from './db/db.jsx';
-import news_banner from '../assets/newsbanner.png';
-import news_car_image from '../assets/placeholdernews.png';
 import ProductCard from './ProductCard.jsx';
 import { v4 as uuidv4 } from 'uuid';
+import { Carousel, CarouselItem } from 'react-bootstrap';
+import carousel_img_one from '../assets/car1.png';
+import carousel_img_two from '../assets/car2.png';
+import carousel_img_three from '../assets/car3.png';
+import mobile_banner from '../assets/mobilebanner.png';
 
 function HomePageNews() {
   const [products, setProducts] = useState([]);
@@ -53,14 +56,20 @@ function HomePageNews() {
 
   return (
     <div className='container'>
-      <div className='row d-flex gap-1'>
-        <div className='col-md-4 col-xs-12'>
-          <img src={news_banner} className='w-100 rounded img-fluid ' />
-        </div>
-        <div className='col-md-7 col-xs-12'>
-          <img src={news_car_image} className='w-100 rounded img-fluid' />
-        </div>
+      <div className='container d-flex justify-content-center'>
+        <img src={mobile_banner} className='d-block d-md-none' />
       </div>
+      <Carousel className='d-none d-md-block'>
+        <CarouselItem>
+          <img src={carousel_img_one} />
+        </CarouselItem>
+        <CarouselItem>
+          <img src={carousel_img_two} />
+        </CarouselItem>
+        <CarouselItem>
+          <img src={carousel_img_three} />
+        </CarouselItem>
+      </Carousel>
       <div className='container d-flex justify-content-center'>
         <h1>Featured items</h1>
       </div>
@@ -68,7 +77,6 @@ function HomePageNews() {
         <div className='row d-flex justify-content-between'>
           {products.map((product, index) => (
             <ProductCard key={index} product={product} onBuyNow={handleBuyNowClick}>
-              {/* Override the card here */}
               <div className='card'>
                 <img className='card-img-top' src={product.img} alt={product.title} />
                 <div className='card-body'>

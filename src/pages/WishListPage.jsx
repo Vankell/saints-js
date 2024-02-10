@@ -9,7 +9,7 @@ function WishListPage() {
     <>
       <AuthProvider>
         <PageNavbar />
-        Alan is having difficulty with the wishlist page, we're sorry :c
+        <Wishlist />
         <Footer />
       </AuthProvider>
     </>

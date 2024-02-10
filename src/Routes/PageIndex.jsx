@@ -6,6 +6,7 @@ import AccountPage from '../pages/AccountPage';
 import ProductsPage from '../pages/ProductsPage';
 import CartPage from '../pages/CartPage';
 import WishListPage from '../pages/WishListPage';
+import { AuthProvider } from '../components/auth/AuthContext';
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
